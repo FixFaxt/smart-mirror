@@ -1,14 +1,12 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { GeoService } from './geo/geo.service';
-import { WeatherService } from './weather/weather.service';
 
 @Controller()
 export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly geoService: GeoService,
-    private readonly weatherService: WeatherService,
   ) {}
 
   @Get()
@@ -25,14 +23,8 @@ export class AppController {
     return status;
   }
 
-  @Get('/location')
-  getLocation() {
-    return this.appService.getLocationData('Reinickendorf');
-  }
-
-  @Get('/weather')
-  async getWeatherData() {
-    await this.weatherService.getWeatherData({ locationName: 'Reinickendorf' });
-    return 1;
+  @Get('/location/:name')
+  getLocation(@Param('name') name: string) {
+    return this.appService.getLocationData(name);
   }
 }

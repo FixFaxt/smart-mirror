@@ -14,10 +14,39 @@ datasource db {
 }
 
 model City {
-  id          Int    @id
-  name        String
-  stateCode   String
-  countryCode String
-  latitude    Float
-  longitude   Float
+  id            Int             @id
+  name          String          @unique
+  stateCode     String
+  countryCode   String
+  latitude      Float
+  longitude     Float
+  DailyWeather  DailyWeather[]
+  HourlyWeather HourlyWeather[]
+}
+
+model DailyWeather {
+  cityId           Int
+  date             DateTime
+  sunrise          DateTime
+  sunset           DateTime
+  weatherCode      Int
+  maxTemperature   Float
+  minTemperature   Float
+  daylightDuration Float
+
+  city City @relation(fields: [cityId], references: [id])
+
+  @@id([date, cityId])
+}
+
+model HourlyWeather {
+  cityId              Int
+  date                DateTime
+  temperature         Float
+  weatherCode         Int
+  apparentTemperature Float
+
+  city City @relation(fields: [cityId], references: [id])
+
+  @@id([date, cityId])
 }
