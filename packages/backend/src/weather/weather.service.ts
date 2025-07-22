@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { DailyWeather, HourlyWeather } from '@prisma/client';
 import { fetchWeatherApi } from 'openmeteo';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -173,6 +175,27 @@ export class WeatherService {
           daylightDuration: entry.daylightDuration[i],
         },
       });
+    }
+  }
+
+  async getWeatherDataForCity(
+    name: string,
+    type: 'hourly' | 'daily',
+  ): Promise<DailyWeather[] | HourlyWeather[] | null> {
+    switch (type) {
+      case 'hourly': {
+        return (await this.prisma.hourlyWeather.findMany({
+          where: { city: { name } },
+        })) as HourlyWeather[];
+      }
+      case 'daily': {
+        return (await this.prisma.dailyWeather.findMany({
+          where: { city: { name } },
+        })) as DailyWeather[];
+      }
+
+      default:
+        return null;
     }
   }
 
