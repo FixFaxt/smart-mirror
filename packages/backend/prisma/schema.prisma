@@ -34,7 +34,7 @@ model DailyWeather {
   minTemperature   Float
   daylightDuration Float
 
-  city City @relation(fields: [cityId], references: [id])
+  city City @relation(fields: [cityId], references: [id], onDelete: Cascade)
 
   @@id([date, cityId])
 }
@@ -46,7 +46,93 @@ model HourlyWeather {
   weatherCode         Int
   apparentTemperature Float
 
-  city City @relation(fields: [cityId], references: [id])
+  city City @relation(fields: [cityId], references: [id], onDelete: Cascade)
 
   @@id([date, cityId])
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  name           String          @unique
+  pin            String
+  SpotifyAccount SpotifyAccount?
+  Todo           Todo[]
+  TodoBoard      TodoBoard[]
+  CalendarEvent  CalendarEvent[]
+  Calendar       Calendar[]
+}
+
+model SpotifyAccount {
+  id     String @id @default(uuid())
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  spotifyUserId String  @unique
+  displayName   String?
+  email         String?
+  avatarUrl     String?
+
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  scope        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Todo {
+  id          Int       @id @default(autoincrement())
+  title       String    @unique
+  description String?
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  expiration  DateTime?
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  todoBoardId Int?
+  TodoBoard   TodoBoard? @relation(fields: [todoBoardId], references: [id], onDelete: Cascade)
+
+  calendarEventTitle String?
+  calendarEvent      CalendarEvent? @relation(fields: [calendarEventTitle], references: [title], onDelete: Cascade)
+}
+
+model TodoBoard {
+  id          Int     @id @default(autoincrement())
+  title       String  @unique
+  description String?
+  userId      Int
+  todos       Todo[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CalendarEvent {
+  id          Int      @id @default(autoincrement())
+  title       String   @unique
+  description String?
+  start       DateTime
+  end         DateTime
+  allDay      Boolean  @default(false)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  calendarId Int?
+  Calendar   Calendar? @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  Todo       Todo[]
+}
+
+model Calendar {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+  color       String  @default("#FFFFFF")
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  CalendarEvent CalendarEvent[]
 }
